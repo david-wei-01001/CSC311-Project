@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib as m
 import matplotlib.pyplot as p
 
-
 def sigmoid(x):
     """ Apply sigmoid function.
     """
@@ -29,11 +28,14 @@ def neg_log_likelihood(data, theta, beta):
     #####################################################################
     log_lklihood = 0.
     for i in range(len(data["is_correct"])):
+        # obtain the parameters
         cur_user_id = data["user_id"][i]
         cur_question_id = data["question_id"][i]
         theta_i = theta[cur_user_id]
         beta_j = beta[cur_question_id]
         c_ij = data["is_correct"][i]
+
+        # compute the log likelihood
         log_like = c_ij * (theta_i - beta_j) - np.log(1 + np.exp(theta_i - beta_j))
         log_lklihood += log_like
 

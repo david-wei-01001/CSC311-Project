@@ -176,6 +176,15 @@ def main():
     #                       END OF YOUR CODE                            #
     #####################################################################
 
+    # Part (b) Limitations of SVD
+    print("When using SVD, we filled in all the missing value NaN by 0,"
+          " this means we are assuming that every student will answer incorrectly "
+          "the question that they has not answered yet. This is a quite naive assumption"
+          "because it is usually not the case that he will incorrectly answer all "
+          "such questions. Thus, by using this assumption, we will definitely reduce "
+          "the accuracy of the model because it no longer is as representative as "
+          "the real situation.")
+
     #####################################################################
     #                                                                   #
     # (ALS) Try out at least 5 different k and select the best k        #
@@ -187,7 +196,7 @@ def main():
     matrix_lst = []
     acc_lst = []
     for k in k_lst:
-        matrix = als(train_data, k, lr, num_iteration)
+        matrix, _ = als(train_data, k, lr, num_iteration)
         matrix_lst.append(matrix)
         acc_lst.append(sparse_matrix_evaluate(val_data, matrix))
     index = 0

@@ -167,11 +167,11 @@ def main():
     iter_lst = [i for i in range(iterations)]
     theta, beta, _, train_lld, valid_lld = irt(train_data, val_data, lr, iterations)
     p.figure()
-    p.plot(iter_lst, train_lld, c='r')
+    p.plot(iter_lst, [(-1) * item for item in train_lld], c='r')
     p.xlabel("number of iterations")
     p.suptitle('Training Log-Likelihood vs Number of Iterations')
     p.show()
-    p.plot(iter_lst, valid_lld, c='b')
+    p.plot(iter_lst, [(-1) * item for item in valid_lld], c='b')
     p.xlabel("number of iterations")
     p.suptitle('Validation Log-Likelihood vs Number of Iterations')
     p.show()

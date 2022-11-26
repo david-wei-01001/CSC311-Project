@@ -3,6 +3,9 @@ from scipy.linalg import sqrtm
 
 import numpy as np
 
+import matplotlib as m
+import matplotlib.pyplot as p
+
 
 def svd_reconstruct(matrix, k):
     """ Given the matrix, perform singular value decomposition
@@ -70,7 +73,7 @@ def update_u_z(train_data, lr, u, z):
     :return: (u, z)
     """
     #####################################################################
-    # TODO:                                                             #
+    #                                                                   #
     # Implement the function as described in the docstring.             #
     #####################################################################
     # Randomly select a pair (user_id, question_id).
@@ -80,14 +83,35 @@ def update_u_z(train_data, lr, u, z):
     c = train_data["is_correct"][i]
     n = train_data["user_id"][i]
     q = train_data["question_id"][i]
+
+    curr_user = u[n]
+    curr_question = z[q]
+    uTz = np.dot(curr_user, curr_question)
+    num_user, _ = u.shape
+    num_question, _ = z.shape
+    u_temp = []
+    for i in range(num_user):
+        u_i = u[i]
+        grad = -lr * curr_question * (c - uTz)
+        u_i -= grad
+        u_temp.append(u_i)
+    z_temp = []
+    for j in range(num_question):
+        z_j = z[j]
+        grad = -lr * curr_user * (c - uTz)
+        z_j -= grad
+        z_temp.append(z_j)
+
+    u = np.array(u_temp)
+    z = np.array(z_temp)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
     return u, z
 
 
-def als(train_data, k, lr, num_iteration):
-    """ Performs ALS algorithm, here we use the iterative solution - SGD 
+def als(train_data, k, lr, num_iteration, calc_square=False):
+    """ Performs ALS algorithm, here we use the iterative solution - SGD
     rather than the direct solution.
 
     :param train_data: A dictionary {user_id: list, question_id: list,
@@ -95,6 +119,7 @@ def als(train_data, k, lr, num_iteration):
     :param k: int
     :param lr: float
     :param num_iteration: int
+    :param calc_square: state whether I want to calculate square error loss
     :return: 2D reconstructed Matrix.
     """
     # Initialize u and z
@@ -104,14 +129,19 @@ def als(train_data, k, lr, num_iteration):
                           size=(len(set(train_data["question_id"])), k))
 
     #####################################################################
-    # TODO:                                                             #
+    #                                                                   #
     # Implement the function as described in the docstring.             #
     #####################################################################
-    mat = None
+    lost_data = []
+    for _ in range(num_iteration):
+        u, z = update_u_z(train_data, lr, u, z)
+        if calc_square:
+            lost_data.append(squared_error_loss(train_data, u, z))
+    mat = np.dot(u, z.T)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
-    return mat
+    return mat, lost_data
 
 
 def main():
@@ -121,25 +151,69 @@ def main():
     test_data = load_public_test_csv("../data")
 
     #####################################################################
-    # TODO:                                                             #
+    #                                                                   #
     # (SVD) Try out at least 5 different k and select the best k        #
     # using the validation set.                                         #
     #####################################################################
-    pass
+    k_lst = [5, 10, 15, 20, 25]
+    matrix_lst = []
+    acc_lst = []
+    for k in k_lst:
+        matrix = svd_reconstruct(train_matrix, k)
+        matrix_lst.append(matrix)
+        acc_lst.append(sparse_matrix_evaluate(val_data, matrix))
+    index = 0
+    curr_acc = acc_lst[0]
+    for i in range(5):
+        if acc_lst[i] > curr_acc:
+            index = i
+            curr_acc = acc_lst[i]
+    test_acc = sparse_matrix_evaluate(test_data, matrix_lst[index])
+    print(f"For Part (a), my chosen k is {k_lst[index]}.")
+    print(f"With this k, my Validation Accuracy is {curr_acc}.")
+    print(f"With this k, my Test Accuracy is {test_acc}.")
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
 
     #####################################################################
-    # TODO:                                                             #
+    #                                                                   #
     # (ALS) Try out at least 5 different k and select the best k        #
     # using the validation set.                                         #
     #####################################################################
-    pass
+    lr = 0.05
+    num_iteration = 250
+    k_lst = [5, 10, 15, 20, 25]
+    matrix_lst = []
+    acc_lst = []
+    for k in k_lst:
+        matrix = als(train_data, k, lr, num_iteration)
+        matrix_lst.append(matrix)
+        acc_lst.append(sparse_matrix_evaluate(val_data, matrix))
+    index = 0
+    curr_acc = acc_lst[0]
+    for i in range(5):
+        if acc_lst[i] > curr_acc:
+            index = i
+            curr_acc = acc_lst[i]
+    test_acc = sparse_matrix_evaluate(test_data, matrix_lst[index])
+
+    _, train_result = als(train_data, k_lst[index], lr, num_iteration, True)
+
+    p.figure()
+    p.plot([i + 1 for i in range(num_iteration)], train_result, c='r')
+    p.xlabel("Number of Iterations")
+    p.suptitle('Squared Error Loss vs Number of Iterations')
+    p.show()
+
+    print(f"For Part (b), my chosen k is {k_lst[index]}.")
+    print(f"With this k, my Validation Accuracy is {curr_acc}.")
+    print(f"With this k, my Test Accuracy is {test_acc}.")
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
 
 
 if __name__ == "__main__":
+    m.use("TKAgg")
     main()

@@ -20,6 +20,7 @@ import part_a.knn as knn
 #     """
 #     return 1 / (1 + np.exp(- inputs))
 
+device = torch.device("cpu")
 
 def load_data(base_path="../data"):
     """ Load the data in PyTorch Tensor.
@@ -59,22 +60,22 @@ class AutoEncoder(nn.Module):
 
         # Define linear functions.
         self.encoder = nn.Sequential(
-            nn.Linear(num_question, 256),
+            nn.Linear(num_question, 128),
             nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(256, 128),
+            nn.Dropout(0.5),
+            nn.Linear(128, 64),
             nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(128, k),
+            nn.Dropout(0.3),
+            nn.Linear(64, k),
         )
         self.decoder = nn.Sequential(
-            nn.Linear(k, 128),
+            nn.Linear(k, 64),
             nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(128, 256),
+            nn.Dropout(0.3),
+            nn.Linear(64, 128),
             nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(256, num_question),
+            nn.Dropout(0.5),
+            nn.Linear(128, num_question),
             nn.Sigmoid(),
         )
 
@@ -135,6 +136,7 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
 
         for user_id in range(num_student):
             inputs = Variable(zero_train_data[user_id]).unsqueeze(0)
+            inputs = inputs.to(device)
             target = inputs.clone()
 
             optimizer.zero_grad()
@@ -178,9 +180,8 @@ def evaluate(model, train_data, valid_data):
 
     for i, u in enumerate(valid_data["user_id"]):
         inputs = Variable(train_data[u]).unsqueeze(0)
+        inputs = inputs.to(device)
         output = model(inputs)
-
-
 
         guess = output[0][valid_data["question_id"][i]].item() >= 0.5
         if guess == valid_data["is_correct"][i]:
@@ -203,7 +204,7 @@ def main():
     _, num_question = zero_train_matrix.shape
 
     # Set optimization hyperparameters.
-    lr = 1e-3
+    lr = 1e-4
     num_epoch = 100
     train_loss_lst = []
     valid_accuracy_lst = []
@@ -212,6 +213,7 @@ def main():
     for k in k_lst:
         # Set model hyperparameters.
         model = AutoEncoder(num_question, k)
+        model.to(device)
 
         train_loss_temp, valid_accuracy_temp = train(model, lr, 0, train_matrix, zero_train_matrix,
                                                      valid_data, num_epoch)
@@ -251,6 +253,7 @@ def main():
     for lamb in lam_lst:
         # Set model hyperparameters.
         model = AutoEncoder(num_question, k_star)
+        model.to(device)
         train(model, lr, lamb, train_matrix, zero_train_matrix, valid_data, num_epoch)
         result = evaluate(model, zero_train_matrix, valid_data)
         evaluate_out.append(result)

@@ -46,7 +46,7 @@ def svd_reconstruct(matrix, k):
     return np.array(reconst_matrix)
 
 
-def squared_error_loss(data, u, z):
+def squared_error_loss(mean, data, u, z):
     """ Return the squared-error-loss given the data.
     :param data: A dictionary {user_id: list, question_id: list,
     is_correct: list}
@@ -56,12 +56,12 @@ def squared_error_loss(data, u, z):
     """
     loss = 0
     for i, q in enumerate(data["question_id"]):
-        loss += (data["is_correct"][i]
+        loss += (data["is_correct"][i] - mean[data["user_id"][i]][data["question_id"][i]]
                  - np.sum(u[data["user_id"][i]] * z[q])) ** 2.
     return 0.5 * loss
 
 
-def update_u_z(train_data, lr, u, z):
+def update_u_z(mean, train_data, lr, u, z):
     """ Return the updated U and Z after applying
     stochastic gradient descent for matrix completion.
 
@@ -84,6 +84,8 @@ def update_u_z(train_data, lr, u, z):
     n = train_data["user_id"][i]
     q = train_data["question_id"][i]
 
+    curr_mean = mean[n][q]
+    c -= curr_mean
     curr_user = u[n]
     curr_question = z[q]
     uTz = np.dot(curr_user, curr_question)
@@ -110,7 +112,7 @@ def update_u_z(train_data, lr, u, z):
     return u, z
 
 
-def als(train_data, k, lr, num_iteration, calc_square=False):
+def als(train_matrix, train_data, k, lr, num_iteration, calc_square=False):
     """ Performs ALS algorithm, here we use the iterative solution - SGD
     rather than the direct solution.
 
@@ -132,12 +134,20 @@ def als(train_data, k, lr, num_iteration, calc_square=False):
     #                                                                   #
     # Implement the function as described in the docstring.             #
     #####################################################################
+    new_matrix = train_matrix.copy()
+    mask = np.isnan(new_matrix)
+    masked_matrix = np.ma.masked_array(new_matrix, mask)
+    item_means = np.mean(masked_matrix, axis=0)
+    new_matrix = masked_matrix.filled(item_means)
+    item_means = np.mean(new_matrix, axis=0)
+    mu = np.tile(item_means, (new_matrix.shape[0], 1))
+    # print(mu)
     lost_data = []
     for _ in range(num_iteration):
-        u, z = update_u_z(train_data, lr, u, z)
+        u, z = update_u_z(mu, train_data, lr, u, z)
         if calc_square:
-            lost_data.append(squared_error_loss(train_data, u, z))
-    mat = np.dot(u, z.T)
+            lost_data.append(squared_error_loss(mu, train_data, u, z))
+    mat = np.array(np.dot(u, z.T) + mu)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
@@ -196,7 +206,7 @@ def main():
     matrix_lst = []
     acc_lst = []
     for k in k_lst:
-        matrix, _ = als(train_data, k, lr, num_iteration)
+        matrix, _ = als(train_matrix, train_data, k, lr, num_iteration)
         matrix_lst.append(matrix)
         acc_lst.append(sparse_matrix_evaluate(val_data, matrix))
     index = 0
@@ -207,7 +217,7 @@ def main():
             curr_acc = acc_lst[i]
     test_acc = sparse_matrix_evaluate(test_data, matrix_lst[index])
 
-    _, train_result = als(train_data, k_lst[index], lr, num_iteration, True)
+    _, train_result = als(train_matrix, train_data, k_lst[index], lr, num_iteration, True)
 
     p.figure()
     p.plot([i + 1 for i in range(num_iteration)], train_result, c='r')

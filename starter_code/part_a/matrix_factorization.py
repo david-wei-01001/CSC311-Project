@@ -141,7 +141,6 @@ def als(train_matrix, train_data, k, lr, num_iteration, calc_square=False):
     new_matrix = masked_matrix.filled(item_means)
     item_means = np.mean(new_matrix, axis=0)
     mu = np.tile(item_means, (new_matrix.shape[0], 1))
-    # print(mu)
     lost_data = []
     for _ in range(num_iteration):
         u, z = update_u_z(mu, train_data, lr, u, z)

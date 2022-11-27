@@ -1,11 +1,11 @@
+"""
+In this file, I will be implementing bagging ensemble to improve the stability
+and accuracy of the IRT base models. I will select and train 3 IRT base models with
+bootstrapping the training set.
+"""
 import random
 from utils import *
 import item_response as irt
-import neural_network as n
-from sklearn.impute import KNNImputer
-import numpy as np
-from scipy.sparse import csr_matrix
-import torch
 
 # Global Variables:
 IRT_lr = 0.01
@@ -14,14 +14,25 @@ IRT_iterations = 1500
 threshold = 0.5
 
 
-def load_data():
+def load_data() -> tuple:
+    """
+    Load the training, validation, and test data.
+
+    :return: (training data, validation data, test data)
+    """
     train_data = load_train_csv("../data")
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
     return train_data, val_data, test_data
 
 
-def bootstrap(data):
+def bootstrap(data) -> dict:
+    """
+    Perform bootstrapping on the input data.
+
+    :param data: the data to be bootstrapped from
+    :return: A re-sampled data with the same size as the input data
+    """
     size = len(data["user_id"])
     new_data = {"user_id": [], "question_id": [], "is_correct": []}
     for _ in range(size):
@@ -32,7 +43,20 @@ def bootstrap(data):
     return new_data
 
 
-def evaluate(theta1, beta1, theta2, beta2, theta3, beta3, test_data):
+def evaluate(theta1, beta1, theta2, beta2, theta3, beta3, test_data) -> float:
+    """
+    Using the 3 trained model to make prediction on the input data and return the accuracy.
+
+    :param theta1: the theta of the first IRT model
+    :param beta1: the beta of the first IRT model
+    :param theta2: the theta of the second IRT model
+    :param beta2: the beta of the second IRT model
+    :param theta3: the theta of the third IRT model
+    :param beta3: the beta of the third IRT model
+    :param test_data: the input data used to make prediction and calculate accuracy
+    :return: the accuracy of my prediction
+    """
+
     total_correct = 0
     total = 0
     # Predict
@@ -63,18 +87,21 @@ def evaluate(theta1, beta1, theta2, beta2, theta3, beta3, test_data):
     return total_correct / total
 
 
-def main():
+def main() -> None:
+    """
+    The main function of my Ensemble
+    """
     train_data, val_data, test_data = load_data()
 
     # Use IRT three times
-    IRT_train1 = bootstrap(train_data)
-    theta1, beta1, _, _, _ = irt.irt(IRT_train1, val_data, IRT_lr, IRT_iterations)
+    irt_train1 = bootstrap(train_data)
+    theta1, beta1, _, _, _ = irt.irt(irt_train1, val_data, IRT_lr, IRT_iterations)
 
-    IRT_train2 = bootstrap(train_data)
-    theta2, beta2, _, _, _ = irt.irt(IRT_train2, val_data, IRT_lr, IRT_iterations)
+    irt_train2 = bootstrap(train_data)
+    theta2, beta2, _, _, _ = irt.irt(irt_train2, val_data, IRT_lr, IRT_iterations)
 
-    IRT_train3 = bootstrap(train_data)
-    theta3, beta3, _, _, _ = irt.irt(IRT_train3, val_data, IRT_lr, IRT_iterations)
+    irt_train3 = bootstrap(train_data)
+    theta3, beta3, _, _, _ = irt.irt(irt_train3, val_data, IRT_lr, IRT_iterations)
 
     # Predict on Validation Data
     valid_acc = evaluate(theta1, beta1, theta2, beta2, theta3, beta3, val_data)

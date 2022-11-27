@@ -119,14 +119,14 @@ def irt(data, val_data, lr, iterations):
     neg_lld_train = []
     neg_lld_vald = []
 
-    for _ in range(iterations):
+    for i in range(iterations):
         neg_lld = neg_log_likelihood(data, theta=theta, beta=beta)
         neg_lld_valid = neg_log_likelihood(val_data, theta=theta, beta=beta)
         score = evaluate(data=val_data, theta=theta, beta=beta)
         val_acc_lst.append(score)
         neg_lld_train.append(neg_lld)
         neg_lld_vald.append(neg_lld_valid)
-        print("NLLK: {} \t Score: {}".format(neg_lld, score))
+        print(f"Iteration: {i} NLLK: {neg_lld} \t Score: {score}")
         theta, beta = update_theta_beta(data, lr, theta, beta)
     return theta, beta, val_acc_lst, neg_lld_train, neg_lld_vald
 
@@ -163,7 +163,7 @@ def main():
     # code, report the validation and test accuracy.                    #
     #####################################################################
     lr = 0.01
-    iterations = 450
+    iterations = 1600
     iter_lst = [i for i in range(iterations)]
     theta, beta, _, train_lld, valid_lld = irt(train_data, val_data, lr, iterations)
     p.figure()
@@ -207,5 +207,4 @@ def main():
 
 
 if __name__ == "__main__":
-    m.use("TKAgg")
     main()

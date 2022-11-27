@@ -147,7 +147,7 @@ def als(train_matrix, train_data, k, lr, num_iteration, calc_square=False):
         u, z = update_u_z(mu, train_data, lr, u, z)
         if calc_square:
             lost_data.append(squared_error_loss(mu, train_data, u, z))
-    mat = np.array(np.dot(u, z.T) + mu)
+    mat = np.array(np.matmul(u, z.T) + mu)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
@@ -187,28 +187,31 @@ def main():
     #####################################################################
 
     # Part (b) Limitations of SVD
-    print("When using SVD, we filled in all the missing value NaN by 0,"
-          " this means we are assuming that every student will answer incorrectly "
-          "the question that they has not answered yet. This is a quite naive assumption"
-          "because it is usually not the case that he will incorrectly answer all "
-          "such questions. Thus, by using this assumption, we will definitely reduce "
-          "the accuracy of the model because it no longer is as representative as "
-          "the real situation.")
+    # print("When using SVD, we filled in all the missing value NaN by 0,"
+    #       " this means we are assuming that every student will answer incorrectly "
+    #       "the question that they has not answered yet. This is a quite naive assumption"
+    #       "because it is usually not the case that he will incorrectly answer all "
+    #       "such questions. Thus, by using this assumption, we will definitely reduce "
+    #       "the accuracy of the model because it no longer is as representative as "
+    #       "the real situation.")
 
     #####################################################################
     #                                                                   #
     # (ALS) Try out at least 5 different k and select the best k        #
     # using the validation set.                                         #
     #####################################################################
-    lr = 0.05
-    num_iteration = 250
+    lr = 1e-3
+    num_iteration = 1000
     k_lst = [5, 10, 15, 20, 25]
     matrix_lst = []
     acc_lst = []
     for k in k_lst:
         matrix, _ = als(train_matrix, train_data, k, lr, num_iteration)
         matrix_lst.append(matrix)
-        acc_lst.append(sparse_matrix_evaluate(val_data, matrix))
+        acc = sparse_matrix_evaluate(val_data, matrix)
+
+        acc_lst.append(acc)
+
     index = 0
     curr_acc = acc_lst[0]
     for i in range(5):
@@ -234,5 +237,4 @@ def main():
 
 
 if __name__ == "__main__":
-    m.use("TKAgg")
     main()

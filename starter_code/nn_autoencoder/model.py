@@ -5,14 +5,9 @@ import torch.utils.data
 import torch
 
 
-class AutoEncoder(nn.Module):
+class Encoder(nn.Module):
     def __init__(self, k=100):
-        """ Initialize a class AutoEncoder.
-
-        :param num_question: int
-        :param k: int
-        """
-        super(AutoEncoder, self).__init__()
+        super(Encoder, self).__init__()
 
         # Define linear functions.
         self.encoder = nn.Sequential(
@@ -24,6 +19,23 @@ class AutoEncoder(nn.Module):
             nn.Dropout(p=0.5),
             nn.Linear(128, k),
         )
+
+    def get_weight_norm(self):
+        norm = 0
+        for step in self.encoder:
+            if type(step) == torch.nn.modules.linear.Linear:
+                norm += torch.norm(step.weight, 2) ** 2
+        return norm
+
+    def forward(self, inputs):
+        return self.encoder(inputs)
+
+
+class Decoder(nn.Module):
+    def __init__(self, k=100):
+        super(Decoder, self).__init__()
+
+        # Define linear functions.
         self.decoder = nn.Sequential(
             nn.Linear(k, 128),
             nn.PReLU(),
@@ -33,27 +45,35 @@ class AutoEncoder(nn.Module):
         )
 
     def get_weight_norm(self):
-        """ Return ||W^1||^2 + ||W^2||^2.
-
-        :return: float
-        """
         norm = 0
-        norm += torch.norm(self.encoder[0].weight, 2) ** 2
-        norm += torch.norm(self.encoder[3].weight, 2) ** 2
-        norm += torch.norm(self.encoder[6].weight, 2) ** 2
-        norm += torch.norm(self.decoder[0].weight, 2) ** 2
-        norm += torch.norm(self.decoder[2].weight, 2) ** 2
-        norm += torch.norm(self.decoder[4].weight, 2) ** 2
+        for step in self.decoder:
+            if type(step) == torch.nn.modules.linear.Linear:
+                norm += torch.norm(step.weight, 2) ** 2
         return norm
 
     def forward(self, inputs):
-        """ Return a forward pass given inputs.
+        return self.decoder(inputs)
 
-        :param inputs: user vector.
-        :return: user vector.
-        """
 
-        encoded = self.encoder(inputs)
-        decoded = self.decoder(encoded)
+class Discriminator(nn.Module):
+    def __init__(self, k=100):
+        super(Discriminator, self).__init__()
 
-        return decoded
+        # Define linear functions.
+        self.discriminator = nn.Sequential(
+            nn.Linear(k, 128),
+            nn.PReLU(),
+            nn.Linear(128, 256),
+            nn.PReLU(),
+            nn.Linear(256, 1),
+        )
+
+    def get_weight_norm(self):
+        norm = 0
+        for step in self.discriminator:
+            if type(step) == torch.nn.modules.linear.Linear:
+                norm += torch.norm(step.weight, 2) ** 2
+        return norm
+
+    def forward(self, inputs):
+        return self.discriminator(inputs)

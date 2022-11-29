@@ -1,10 +1,13 @@
+"""
+Implementation of Part A question 1
+"""
 from sklearn.impute import KNNImputer
 from utils import *
 import matplotlib as m
 import matplotlib.pyplot as p
 
 
-def knn_impute_by_user(matrix, valid_data, k):
+def knn_impute_by_user(matrix, valid_data, k) -> float:
     """ Fill in the missing values using k-Nearest Neighbors based on
     student similarity. Return the accuracy on valid_data.
 
@@ -25,7 +28,7 @@ def knn_impute_by_user(matrix, valid_data, k):
     return acc
 
 
-def knn_impute_by_item(matrix, valid_data, k):
+def knn_impute_by_item(matrix, valid_data, k) -> float:
     """ Fill in the missing values using k-Nearest Neighbors based on
     question similarity. Return the accuracy on valid_data.
 
@@ -50,7 +53,10 @@ def knn_impute_by_item(matrix, valid_data, k):
     return acc
 
 
-def main():
+def main() -> None:
+    """
+    The main function
+    """
     sparse_matrix = load_train_sparse("../data").toarray()
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")

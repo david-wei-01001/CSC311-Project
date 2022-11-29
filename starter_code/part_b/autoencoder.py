@@ -18,7 +18,7 @@ class AutoEncoder(nn.Module):
         self.encoder = nn.Sequential(
             nn.Linear(num_question, 887),
             nn.PReLU(),
-            nn.Dropout(0.5),
+            nn.Dropout(0.7),
             nn.Linear(887, 221),
             nn.PReLU(),
             nn.Dropout(0.5),

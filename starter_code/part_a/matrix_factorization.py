@@ -200,9 +200,9 @@ def main():
     # (ALS) Try out at least 5 different k and select the best k        #
     # using the validation set.                                         #
     #####################################################################
-    lr = 1e-3
-    num_iteration = 1000
-    k_lst = [5, 10, 15, 20, 25]
+    lr = 1e-2
+    num_iteration = 2000
+    k_lst = [2,5,10,15,20]
     matrix_lst = []
     acc_lst = []
     for k in k_lst:

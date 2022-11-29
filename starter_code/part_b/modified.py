@@ -164,7 +164,7 @@ def main():
     # Try out 5 different k and select the best k using the             #
     # validation set.                                                   #
     #####################################################################
-    k_lst = [4]
+    k_lst = [6]
     lam_lst = [0.001, 0.01, 0.1, 1]
     evaluate_out = []
     _, num_question = zero_train_matrix.shape
@@ -177,52 +177,52 @@ def main():
 
     # Set optimization hyperparameters.
     lr = 1e-5
-    num_epoch = 108
+    num_epoch = 250
     train_loss_lst = []
     valid_accuracy_lst = []
     model_lst = []
-    # # Part C
-    # for k in k_lst:
-    #     # Set model hyperparameters.
-    #     model = AutoEncoder(num_question, k)
-    #     model.to(device)
-    #
-    #     train_loss_temp, valid_accuracy_temp = train(model, lr, 0, train_matrix_imputed, train_matrix_imputed,
-    #                                                  valid_data, num_epoch, class_weights)
-    #
-    #     result = evaluate(model, train_matrix_imputed, valid_data)
-    #     train_loss_lst.append(train_loss_temp)
-    #     valid_accuracy_lst.append(valid_accuracy_temp)
-    #     model_lst.append(model)
-    #     evaluate_out.append(result)
-    #     plt.show()
-    #
-    # best_k = 0
-    # curr_acc = evaluate_out[0]
-    # for i in range(len(evaluate_out)):
-    #     if evaluate_out[i] > curr_acc:
-    #         curr_acc = evaluate_out[i]
-    #         best_k = i
-    # k_star = k_lst[best_k]
-    # print(f"My best k is {k_star}")
-    #
-    # # Part D
-    # model = model_lst[best_k]
-    # train_loss = train_loss_lst[best_k]
-    # valid_accuracy = valid_accuracy_lst[best_k]
-    # epoch_lst = [i + 1 for i in range(num_epoch)]
-    # plt.plot(epoch_lst, train_loss)
-    # plt.xlabel("Number of Epoch")
-    # plt.suptitle('Training Costs Changes w.r.t. Epoch')
-    # plt.show()
-    # plt.plot(epoch_lst, valid_accuracy)
-    # plt.xlabel("Number of Epoch")
-    # plt.suptitle('Validation Accuracy Changes w.r.t. Epoch')
-    # plt.show()
-    # test_result = evaluate(model, train_matrix_imputed, test_data)
-    # print(f"The final test accuracy without regularization is {test_result}")
+    # Part C
+    for k in k_lst:
+        # Set model hyperparameters.
+        model = AutoEncoder(num_question, k)
+        model.to(device)
 
-    # Part E
+        train_loss_temp, valid_accuracy_temp = train(model, lr, 0, train_matrix_imputed, train_matrix_imputed,
+                                                     valid_data, num_epoch, class_weights)
+
+        result = evaluate(model, train_matrix_imputed, valid_data)
+        train_loss_lst.append(train_loss_temp)
+        valid_accuracy_lst.append(valid_accuracy_temp)
+        model_lst.append(model)
+        evaluate_out.append(result)
+        plt.show()
+
+    best_k = 0
+    curr_acc = evaluate_out[0]
+    for i in range(len(evaluate_out)):
+        if evaluate_out[i] > curr_acc:
+            curr_acc = evaluate_out[i]
+            best_k = i
+    k_star = k_lst[best_k]
+    print(f"My best k is {k_star}")
+
+    # Part D
+    model = model_lst[best_k]
+    train_loss = train_loss_lst[best_k]
+    valid_accuracy = valid_accuracy_lst[best_k]
+    epoch_lst = [i + 1 for i in range(num_epoch)]
+    plt.plot(epoch_lst, train_loss)
+    plt.xlabel("Number of Epoch")
+    plt.suptitle('Training Costs Changes w.r.t. Epoch')
+    plt.show()
+    plt.plot(epoch_lst, valid_accuracy)
+    plt.xlabel("Number of Epoch")
+    plt.suptitle('Validation Accuracy Changes w.r.t. Epoch')
+    plt.show()
+    test_result = evaluate(model, train_matrix_imputed, test_data)
+    print(f"The final test accuracy without regularization is {test_result}")
+
+    #Part E
     num_epoch = 200
     model_lst = []
     evaluate_out = []

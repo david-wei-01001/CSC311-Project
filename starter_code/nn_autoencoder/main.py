@@ -11,9 +11,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
 
-def train_loop(dataloader, encoder, decoder, discrim, loss_fn, encoder_opt, decoder_opt, discrim_opt, generat_opt, adv=False):
-    size = len(dataloader.dataset)
-def train_loop(dataloader, model, loss_fn, optimizer):
+def train_loop(dataloader, encoder, decoder, discrim, loss_fn, encoder_opt, decoder_opt, discrim_opt, generat_opt,
+               adv=False):
     total_loss = 0
 
     for batch, row in enumerate(dataloader):
@@ -107,7 +106,7 @@ def main():
 
     # setup hyperparameters
     k_lst = [10]
-    lr_lst = [1e-4]
+    lr_lst = [1e-3]
     num_epoch = 500
     verbose = True
 
@@ -131,10 +130,14 @@ def main():
             decoder_opt = torch.optim.Adam(decoder.parameters(), lr=lr)
             generat_opt = torch.optim.Adam(encoder.parameters(), lr=lr)
             discrim_opt = torch.optim.Adam(discrim.parameters(), lr=lr)
-            criterion = torch.nn.BCEWithLogitsLoss(reduction='sum')
+            criterion = torch.nn.BCEWithLogitsLoss(reduction='mean')
             for t in range(num_epoch):
-                loss = train_loop(train_loader, encoder, decoder, discrim, criterion, encoder_opt, decoder_opt, discrim_opt, generat_opt, adv)
+                loss = train_loop(train_loader, encoder, decoder, discrim, criterion, encoder_opt, decoder_opt,
+                                  discrim_opt, generat_opt, adv)
                 val_acc = test_loop(train, valid_loader, encoder, decoder, val=True)
+
+                if verbose:
+                    print(f"Epoch {t + 1}, Loss {loss}, Validation Accuracy {val_acc}")
 
                 # if validation accuracy is best so far, save model
                 if val_acc > best_acc:
@@ -170,8 +173,12 @@ def main():
         discrim_opt = torch.optim.Adam(discrim.parameters(), lr=best_lr)
         criterion = torch.nn.BCEWithLogitsLoss(reduction='sum')
         for t in range(num_epoch):
-            loss = train_loop(train_loader, encoder, decoder, discrim, criterion, encoder_opt, decoder_opt, discrim_opt, generat_opt, adv)
+            loss = train_loop(train_loader, encoder, decoder, discrim, criterion, encoder_opt, decoder_opt, discrim_opt,
+                              generat_opt, adv)
             val_acc = test_loop(train, valid_loader, encoder, decoder, val=True)
+
+            if verbose:
+                print(f"Epoch {t + 1}, Loss {loss}, Validation Accuracy {val_acc}")
 
             # if validation accuracy is best so far, save model
             if val_acc > best_acc:

@@ -13,14 +13,6 @@ import matplotlib as m
 import matplotlib.pyplot as p
 
 
-
-# def sigmoid(inputs):
-#     """
-#     Apply the Logistic Sigmoid Function to the input
-#     """
-#     return 1 / (1 + np.exp(- inputs))
-
-
 def load_data(base_path="../data"):
     """ Load the data in PyTorch Tensor.
 

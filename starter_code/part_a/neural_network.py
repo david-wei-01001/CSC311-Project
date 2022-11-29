@@ -1,8 +1,11 @@
+"""
+Implementation of Part A question 3 Option B
+"""
 from utils import *
 from torch.autograd import Variable
 
 import torch.nn as nn
-import torch.nn.functional as F
+# import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data
 
@@ -13,7 +16,7 @@ import matplotlib as m
 import matplotlib.pyplot as p
 
 
-def load_data(base_path="../data"):
+def load_data(base_path="../data") -> tuple:
     """ Load the data in PyTorch Tensor.
 
     :return: (zero_train_matrix, train_data, valid_data, test_data)
@@ -41,7 +44,10 @@ def load_data(base_path="../data"):
 
 
 class AutoEncoder(nn.Module):
-    def __init__(self, num_question, k=100):
+    """
+    The AutoEncoder Neural Network that we are going to train.
+    """
+    def __init__(self, num_question, k=100) -> None:
         """ Initialize a class AutoEncoder.
 
         :param num_question: int
@@ -53,7 +59,7 @@ class AutoEncoder(nn.Module):
         self.g = nn.Linear(num_question, k)
         self.h = nn.Linear(k, num_question)
 
-    def get_weight_norm(self):
+    def get_weight_norm(self) -> float:
         """ Return ||W^1||^2 + ||W^2||^2.
 
         :return: float
@@ -62,7 +68,7 @@ class AutoEncoder(nn.Module):
         h_w_norm = torch.norm(self.h.weight, 2) ** 2
         return g_w_norm + h_w_norm
 
-    def forward(self, inputs):
+    def forward(self, inputs) -> float:
         """ Return a forward pass given inputs.
 
         :param inputs: user vector.
@@ -83,7 +89,7 @@ class AutoEncoder(nn.Module):
         return out
 
 
-def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
+def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch) -> tuple:
     """ Train the neural network, where the objective also includes
     a regularizer.
 
@@ -137,7 +143,7 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
     #####################################################################
 
 
-def evaluate(model, train_data, valid_data):
+def evaluate(model, train_data, valid_data) -> float:
     """ Evaluate the valid_data on the current model.
 
     :param model: Module
@@ -163,7 +169,10 @@ def evaluate(model, train_data, valid_data):
     return correct / float(total)
 
 
-def main():
+def main() -> None:
+    """
+    The main function.
+    """
     zero_train_matrix, train_matrix, valid_data, test_data = load_data()
 
     #####################################################################
@@ -182,7 +191,8 @@ def main():
     train_loss_lst = []
     valid_accuracy_lst = []
     model_lst = []
-    #Part C
+
+    # Part C
     for k in k_lst:
         # Set model hyperparameters.
         model = AutoEncoder(num_question, k)

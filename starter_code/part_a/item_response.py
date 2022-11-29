@@ -1,3 +1,6 @@
+"""
+Implementation of Part A question 2
+"""
 from utils import *
 
 import numpy as np
@@ -6,13 +9,13 @@ import matplotlib as m
 import matplotlib.pyplot as p
 
 
-def sigmoid(x):
+def sigmoid(x) -> float:
     """ Apply sigmoid function.
     """
     return np.exp(x) / (1 + np.exp(x))
 
 
-def neg_log_likelihood(data, theta, beta):
+def neg_log_likelihood(data, theta, beta) -> float:
     """ Compute the negative log-likelihood.
 
     You may optionally replace the function arguments to receive a matrix.
@@ -43,7 +46,7 @@ def neg_log_likelihood(data, theta, beta):
     return -log_lklihood
 
 
-def update_theta_beta(data, lr, theta, beta):
+def update_theta_beta(data, lr, theta, beta) -> tuple:
     """ Update theta and beta using gradient descent.
 
     You are using alternating gradient descent. Your update should look:
@@ -75,7 +78,6 @@ def update_theta_beta(data, lr, theta, beta):
         curr_question = data["question_id"][i]
         update_theta_i[curr_user] += lr * (entry - sigmoid(theta[curr_user] - beta[curr_question]))
     for i in range(num_user):
-
         # Plus because we want to minimize negative log likelihood function as loss function,
         # that means we want to maximize log likelihood function, so we should follow the gradient.
         theta[i] += update_theta_i[i]
@@ -84,8 +86,8 @@ def update_theta_beta(data, lr, theta, beta):
         entry = data["is_correct"][i]
         curr_user = data["user_id"][i]
         curr_question = data["question_id"][i]
-        update_beta_j[curr_question] += lr * \
-                                        (sigmoid(theta[curr_user] - beta[curr_question]) - entry)
+        update_beta_j[curr_question] += lr * (sigmoid(theta[curr_user] - beta[curr_question])
+                                              - entry)
     for j in range(num_question):
         beta[j] += lr * update_beta_j[j]
 
@@ -95,7 +97,7 @@ def update_theta_beta(data, lr, theta, beta):
     return theta, beta
 
 
-def irt(data, val_data, lr, iterations):
+def irt(data, val_data, lr, iterations) -> tuple:
     """ Train IRT model.
 
     You may optionally replace the function arguments to receive a matrix.
@@ -130,7 +132,7 @@ def irt(data, val_data, lr, iterations):
     return theta, beta, val_acc_lst, neg_lld_train, neg_lld_vald
 
 
-def evaluate(data, theta, beta):
+def evaluate(data, theta, beta) -> float:
     """ Evaluate the model given data and return the accuracy.
     :param data: A dictionary {user_id: list, question_id: list,
     is_correct: list}
@@ -145,14 +147,16 @@ def evaluate(data, theta, beta):
         x = (theta[u] - beta[q]).sum()
         p_a = sigmoid(x)
         pred.append(p_a >= 0.5)
-    return np.sum((data["is_correct"] == np.array(pred))) \
-           / len(data["is_correct"])
+    return np.sum((data["is_correct"] == np.array(pred))) / len(data["is_correct"])
 
 
-def main():
+def main() -> None:
+    """
+    The main function
+    """
     train_data = load_train_csv("../data")
     # You may optionally use the sparse matrix.
-    sparse_matrix = load_train_sparse("../data")
+    # sparse_matrix = load_train_sparse("../data")
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
 

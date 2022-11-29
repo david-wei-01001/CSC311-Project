@@ -1,3 +1,6 @@
+"""
+Implementation of Part A Question 3 Option 1
+"""
 from utils import *
 from scipy.linalg import sqrtm
 

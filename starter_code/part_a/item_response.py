@@ -37,7 +37,8 @@ def neg_log_likelihood(data, theta, beta) -> float:
         theta_i = theta[cur_user_id]
         beta_j = beta[cur_question_id]
         c_ij = data["is_correct"][i]
-        log_like = c_ij * (theta_i - beta_j) - np.log(1 + np.exp(theta_i - beta_j))
+        log_like = c_ij * (theta_i - beta_j) - np.log(1 + np.exp(theta_i - beta_j)) \
+                   + np.log(1) - c_ij * np.log(1)
         log_lklihood += log_like
 
     #####################################################################

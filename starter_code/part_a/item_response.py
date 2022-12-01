@@ -9,6 +9,7 @@ import matplotlib as m
 import matplotlib.pyplot as p
 
 
+
 def sigmoid(x) -> float:
     """ Apply sigmoid function.
     """
@@ -32,13 +33,16 @@ def neg_log_likelihood(data, theta, beta) -> float:
     #####################################################################
     log_lklihood = 0.
     for i in range(len(data["is_correct"])):
+        # obtain the parameters
         cur_user_id = data["user_id"][i]
         cur_question_id = data["question_id"][i]
         theta_i = theta[cur_user_id]
         beta_j = beta[cur_question_id]
         c_ij = data["is_correct"][i]
+
         log_like = c_ij * (theta_i - beta_j) - np.log(1 + np.exp(theta_i - beta_j)) \
                    + np.log(1) - c_ij * np.log(1)
+
         log_lklihood += log_like
 
     #####################################################################
@@ -120,15 +124,19 @@ def irt(data, val_data, lr, iterations) -> tuple:
     neg_lld_train = []
     neg_lld_vald = []
 
+
     for num_iteration in range(iterations):
+
         neg_lld = neg_log_likelihood(data, theta=theta, beta=beta)
         neg_lld_valid = neg_log_likelihood(val_data, theta=theta, beta=beta)
         score = evaluate(data=val_data, theta=theta, beta=beta)
         val_acc_lst.append(score)
         neg_lld_train.append(neg_lld)
         neg_lld_vald.append(neg_lld_valid)
+
         print("Number of iteration: {} \t NLLK: {} \t Score: {}"
               .format(num_iteration, neg_lld, score))
+
         theta, beta = update_theta_beta(data, lr, theta, beta)
     return theta, beta, val_acc_lst, neg_lld_train, neg_lld_vald
 
@@ -167,6 +175,7 @@ def main() -> None:
     # code, report the validation and test accuracy.                    #
     #####################################################################
     lr = 0.01
+
     iterations = 1500
     iter_lst = [i for i in range(iterations)]
     theta, beta, _, train_lld, valid_lld = irt(train_data, val_data, lr, iterations)
@@ -211,5 +220,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    m.use("TKAgg")
     main()

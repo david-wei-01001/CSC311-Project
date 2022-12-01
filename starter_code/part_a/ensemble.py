@@ -35,11 +35,13 @@ def bootstrap(data) -> dict:
     """
     size = len(data["user_id"])
     new_data = {"user_id": [], "question_id": [], "is_correct": []}
+
     for _ in range(size):
         index = random.randint(0, size - 1)
         new_data["user_id"].append(data["user_id"][index])
         new_data["question_id"].append(data["question_id"][index])
         new_data["is_correct"].append(data["is_correct"][index])
+
     return new_data
 
 

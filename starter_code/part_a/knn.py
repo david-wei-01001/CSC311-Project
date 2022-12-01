@@ -4,7 +4,7 @@ Implementation of Part A question 1
 from sklearn.impute import KNNImputer
 from utils import *
 import matplotlib as m
-import matplotlib.pyplot as p
+import matplotlib.pyplot as plt
 
 
 def knn_impute_by_user(matrix, valid_data, k) -> float:
@@ -72,11 +72,13 @@ def main() -> None:
     acc_lst = []
     for k in k_lst:
         acc_lst.append(knn_impute_by_user(sparse_matrix, val_data, k))
-    p.figure()
-    p.scatter(k_lst, acc_lst, c='r')
-    p.xlabel("k value")
-    p.suptitle('Accuracy vs k Based on Users')
-    p.show()
+
+    plt.figure()
+    plt.scatter(k_lst, acc_lst, c='r')
+    plt.xlabel("k value")
+    plt.suptitle('Accuracy vs k Based on Users')
+    plt.show()
+
     k = k_lst[0]
     biggest_acc = acc_lst[0]
     for i in range(len(k_lst)):
@@ -92,11 +94,11 @@ def main() -> None:
     acc_lst = []
     for k in k_lst:
         acc_lst.append(knn_impute_by_item(sparse_matrix, val_data, k))
-    p.figure()
-    p.scatter(k_lst, acc_lst, c='r')
-    p.xlabel("k value")
-    p.suptitle('Accuracy vs k Based on Questions')
-    p.show()
+    plt.figure()
+    plt.scatter(k_lst, acc_lst, c='r')
+    plt.xlabel("k value")
+    plt.suptitle('Accuracy vs k Based on Questions')
+    plt.show()
     k = k_lst[0]
     biggest_acc = acc_lst[0]
     for i in range(len(k_lst)):

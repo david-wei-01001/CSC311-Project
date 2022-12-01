@@ -7,8 +7,9 @@ import numpy as np
 
 
 class InteractionDataset(Dataset):
-    def __init__(self, data, meta=False, **kwargs):
+    def __init__(self, data, data_zero, meta=False, **kwargs):
         self.data: pd.DataFrame = data
+        self.data_zero: pd.DataFrame = data_zero
         self.meta: bool = meta
         if meta:
             self.question_meta: pd.DataFrame = kwargs["question_meta"]
@@ -19,10 +20,13 @@ class InteractionDataset(Dataset):
         return self.data.shape[0]
 
     def __getitem__(self, idx):
-        # return the row for user in the sparse matrix
+        # return the row for question in the sparse matrix
         row = self.data.iloc[idx]
+        row_zero = self.data_zero.iloc[idx]
         row = torch.from_numpy(row.values).float()
+        row_zero = torch.from_numpy(row_zero.values).float()
 
+        # TODO: user based and question based will be different
         if self.meta:
             # get index for non NaN questions
             question_idx = np.where(~np.isnan(row))[0]
@@ -41,7 +45,7 @@ class InteractionDataset(Dataset):
 
             return row, question_meta, subject_meta, student_meta
 
-        return row
+        return row_zero, row
 
 
 class ObservationDataset(Dataset):
@@ -61,7 +65,6 @@ class ObservationDataset(Dataset):
         row = self.data.iloc[idx]
 
         if self.meta:
-
             # get the question metadata
             question_meta = self.question_meta[row["question_id"]]
             # get the subject metadata
@@ -84,9 +87,16 @@ class ObservationDataset(Dataset):
 def load_dataset(meta=False):
     """ Load cvs files and return train, valid, test datasets.
     """
-    train_data = np.load("../data/imputed_matrix.npz")["arr_0"]
+    train_data = load_npz("../data/train_sparse.npz").toarray()
+
+    # fill nan with 0
+    zero_train_data = train_data.copy()
+    # Fill in the missing entries to 0.
+    zero_train_data[np.isnan(train_data)] = 0
+
     # transform to pandas dataframe
     train_data = pd.DataFrame(train_data)
+    train_zero_data = pd.DataFrame(zero_train_data)
 
     val_data = pd.read_csv("../data/valid_data.csv")
     test_data = pd.read_csv("../data/test_data.csv")
@@ -96,11 +106,12 @@ def load_dataset(meta=False):
     student_meta = pd.read_csv("../data/student_meta.csv", index_col=0)
     subject_meta = pd.read_csv("../data/subject_meta.csv", index_col=0)
 
-    train_dataset = InteractionDataset(train_data,
+    train_dataset = InteractionDataset(train_data, train_zero_data,
                                        meta=meta,
                                        question_meta=question_meta,
                                        student_meta=student_meta,
                                        subject_meta=subject_meta)
+
     val_dataset = ObservationDataset(val_data,
                                      meta=meta,
                                      question_meta=question_meta,

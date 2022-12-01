@@ -12,11 +12,10 @@ class Encoder(nn.Module):
         # Define linear functions.
         self.encoder = nn.Sequential(
             nn.Linear(1774, 256),
-            nn.PReLU(),
-            nn.Dropout(p=0.7),
+            nn.Sigmoid(),
             nn.Linear(256, 128),
-            nn.PReLU(),
-            nn.Dropout(p=0.5),
+            nn.Sigmoid(),
+            nn.Dropout(p=0.8),
             nn.Linear(128, k),
         )
 
@@ -38,9 +37,9 @@ class Decoder(nn.Module):
         # Define linear functions.
         self.decoder = nn.Sequential(
             nn.Linear(k, 128),
-            nn.PReLU(),
+            nn.Sigmoid(),
             nn.Linear(128, 256),
-            nn.PReLU(),
+            nn.Sigmoid(),
             nn.Linear(256, 1774),
         )
 

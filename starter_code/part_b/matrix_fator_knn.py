@@ -4,7 +4,6 @@ from part_a.knn import *
 from sklearn.neighbors import NearestNeighbors
 
 
-
 def svd_demean(matrix, k):
     """ Given the matrix, perform singular value decomposition
     to reconstruct the matrix.
@@ -69,23 +68,21 @@ def main():
     test_data = load_public_test_csv("../data")
 
     # load npz file
-    train_matrix_imputed = np.load("imputed_matrix.npz")["arr_0"]
-
+    train_matrix_imputed = np.load("../data/imputed_matrix.npz")["arr_0"]
 
     k_lst = list(range(1, 200))
     matrix_lst = []
     acc_lst = []
-    # for k in k_lst:
-    # #impute using knn
-    # nbrs = KNNImputer(n_neighbors=k)
-    # # We use NaN-Euclidean distance measure.
-    # imputed_matrix = nbrs.fit_transform(train_matrix.T).T
-    mat = svd_reconstruct(train_matrix_imputed, 4)
-    acc = sparse_matrix_evaluate(val_data, mat)
+    for k in k_lst:
+        # impute using knn
+        nbrs = KNNImputer(n_neighbors=k)
+        # We use NaN-Euclidean distance measure.
+        imputed_matrix = nbrs.fit_transform(train_matrix.T).T
+        mat = svd_reconstruct(train_matrix_imputed, 4)
+        acc = sparse_matrix_evaluate(val_data, mat)
 
-    acc_lst.append(acc)
-    print("k = {}, Validation Accuracy: {}".format(4, acc))
-
+        acc_lst.append(acc)
+        print("k = {}, Validation Accuracy: {}".format(4, acc))
 
     index = 0
     curr_acc = acc_lst[0]

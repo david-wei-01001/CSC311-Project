@@ -1,9 +1,7 @@
-import numpy as np
 import torch
 from torch.utils.data import DataLoader
-import pandas as pd
 
-from dataloader import load_dataset
+from deep_autenc.dataloader import load_dataset
 from model import AutoEncoder
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
